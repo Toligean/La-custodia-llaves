@@ -45,7 +45,6 @@ details{margin-top:6px}footer{text-align:center;color:var(--muted);font-size:11p
 <input id="searchKeys" placeholder="Buscar llave, lugar o persona…">
 <div id="keysList"></div>
 </section>
-
 <section id="move" class="panel">
 <h2 class="section-title">Registrar movimiento</h2>
 <div class="card">
@@ -66,7 +65,6 @@ details{margin-top:6px}footer{text-align:center;color:var(--muted);font-size:11p
 <button id="saveMove" class="btn green" style="width:100%;margin-top:10px" type="button">Confirmar movimiento</button>
 </div>
 </section>
-
 <section id="inventory" class="panel">
 <h2 class="section-title">Inventario de llaves</h2>
 <div class="card">
@@ -86,7 +84,6 @@ details{margin-top:6px}footer{text-align:center;color:var(--muted);font-size:11p
 <input id="searchInventory" type="search" placeholder="Buscar por nombre, código, ubicación o descripción…">
 <div id="inventoryList"></div>
 </section>
-
 <section id="history" class="panel">
 <h2 class="section-title">Registro de movimientos</h2>
 <input id="searchHistory" placeholder="Buscar por llave o persona…">
@@ -100,7 +97,6 @@ details{margin-top:6px}footer{text-align:center;color:var(--muted);font-size:11p
 </section>
 </main>
 <footer>Los datos se guardan en una base de datos IndexedDB de este navegador y dispositivo. Exporta copias de seguridad periódicamente.</footer>
-
 <script>
 (async()=>{
 'use strict';
@@ -154,7 +150,6 @@ const stamp=d=>{
 const key=id=>data.keys.find(k=>k.id===id);
 const active=id=>[...data.moves].reverse().find(m=>m.keyId===id&&m.type==='out'&&!m.returnedAt);
 const status=k=>active(k.id)?'out':'available';
-
 function persist(){
  const snapshot=JSON.parse(JSON.stringify(data));
  writeQueue=writeQueue.then(()=>write(snapshot)).catch(e=>{
@@ -163,7 +158,6 @@ function persist(){
  return writeQueue;
 }
 function save(){persist();render();}
-
 function tab(id,moveType){
  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===id&&(!b.dataset.move||b.dataset.move===($('type')?.value||'out'))));
  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id===id));
@@ -174,10 +168,7 @@ function tab(id,moveType){
  }
  if(id==='inventory')renderInventory();
 }
-document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>{
- if(b.dataset.move)tab('move',b.dataset.move);else tab(b.dataset.tab);
-}));
-
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.move)tab('move',b.dataset.move);else tab(b.dataset.tab);}));
 function localDateTime(d=new Date()){
  const pad=n=>String(n).padStart(2,'0');
  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
@@ -190,7 +181,6 @@ function syncMoveFields(){
  if(t==='in'&&!$('inDateTime').value)$('inDateTime').value=localDateTime();
  document.querySelectorAll('nav button[data-move]').forEach(b=>b.classList.toggle('active',b.dataset.move===t&&$('move').classList.contains('active')));
 }
-
 function renderKeys(){
  const q=$('searchKeys').value.trim().toLowerCase();
  const list=data.keys.filter(k=>([k.name,k.code,k.location,k.details].join(' ')).toLowerCase().includes(q));
@@ -199,7 +189,6 @@ function renderKeys(){
   return `<div class="card"><div class="top"><div><div class="name">${esc(k.name)}</div><div class="sub">${esc(k.code||'Sin código')}${k.location?' · '+esc(k.location):''}</div></div><span class="pill ${ok?'available':'inuse'}">${ok?'DISPONIBLE':'EN USO'}</span></div>${m?`<div class="sub">La tiene: <b>${esc(m.person)}</b> · Desde ${stamp(m.at)}</div>`:''}${k.details?`<div class="sub">${esc(k.details)}</div>`:''}<div class="actions">${ok?`<button class="btn green" type="button" data-out="${esc(k.id)}">Entregar</button>`:`<button class="btn red" type="button" data-in="${esc(k.id)}">Devolución</button>`}<button class="btn light small" type="button" data-edit="${esc(k.id)}">Editar</button></div></div>`;
  }).join(''):'<div class="empty">No hay llaves que coincidan con la búsqueda.</div>';
 }
-
 function renderInventory(){
  const input=$('searchInventory');
  const q=(input?.value||'').trim().toLocaleLowerCase('es');
@@ -209,20 +198,15 @@ function renderInventory(){
    <div class="top"><div><div class="name">${esc(k.name)}</div><div class="sub">${esc(k.code||'Sin código')}${k.location?' · '+esc(k.location):''}</div></div>
    <span class="pill ${status(k)==='out'?'inuse':'available'}">${status(k)==='out'?'EN USO':'DISPONIBLE'}</span></div>
    ${k.details?`<div class="sub">${esc(k.details)}</div>`:''}
-   <div class="actions">
-    <button class="btn light small" type="button" data-edit="${esc(k.id)}">Editar</button>
-    <button class="btn light small" type="button" data-del="${esc(k.id)}">Eliminar</button>
-   </div>
+   <div class="actions"><button class="btn light small" type="button" data-edit="${esc(k.id)}">Editar</button><button class="btn light small" type="button" data-del="${esc(k.id)}">Eliminar</button></div>
   </div>`).join(''):'<div class="empty">No se encontraron llaves en el inventario.</div>';
- // Al buscar, desplaza la vista hasta la primera llave coincidente.
- if(q && list.length){
+ if(q&&list.length){
   requestAnimationFrame(()=>{
    const first=$('inventoryList').querySelector('[data-inventory-key]');
-   first?.scrollIntoView({behavior:'smooth',block:'center'});
+   if(first)first.scrollIntoView({behavior:'smooth',block:'center'});
   });
  }
 }
-
 function moveOptions(){
  const t=$('type').value;
  const arr=data.keys.filter(k=>t==='out'?status(k)==='available':status(k)==='out');
@@ -233,58 +217,38 @@ function moveOptions(){
 }
 $('type').addEventListener('change',()=>{syncMoveFields();moveOptions();});
 $('moveKey').addEventListener('change',()=>{
- if($('type').value==='in'){
-  const m=active($('moveKey').value);$('person').value=m?.person||'';$('dni').value=m?.returnDni||'';
- }
+ if($('type').value==='in'){const m=active($('moveKey').value);$('person').value=m?.person||'';$('dni').value=m?.returnDni||'';}
  syncMoveFields();
 });
 $('searchKeys').addEventListener('input',renderKeys);
 $('searchInventory').addEventListener('input',renderInventory);
-
 function clearForm(){
  ['editId','keyName','keyCode','keyLocation','keyDetails'].forEach(id=>$(id).value='');
- $('saveKey').textContent='Añadir llave';
- $('cancelEdit').style.display='none';
+ $('saveKey').textContent='Añadir llave';$('cancelEdit').style.display='none';
 }
 $('saveKey').addEventListener('click',()=>{
  const name=$('keyName').value.trim();
  if(!name){alert('Escribe el nombre de la llave.');$('keyName').focus();return;}
  const id=$('editId').value;
  const obj={name,code:$('keyCode').value.trim(),location:$('keyLocation').value.trim(),details:$('keyDetails').value.trim()};
- if(id){
-  const existing=key(id);
-  if(!existing){alert('No se encuentra la llave que quieres editar.');clearForm();return;}
-  Object.assign(existing,obj);
- }else data.keys.push({id:makeId(),...obj});
+ if(id){const existing=key(id);if(!existing){alert('No se encuentra la llave que quieres editar.');clearForm();return;}Object.assign(existing,obj);}
+ else data.keys.push({id:makeId(),...obj});
  clearForm();save();
 });
 $('cancelEdit').addEventListener('click',clearForm);
-
 function edit(id){
- const k=key(id);
- if(!k){alert('No se ha encontrado la llave seleccionada.');return;}
- tab('inventory');
- $('editId').value=k.id;
- $('keyName').value=k.name||'';
- $('keyCode').value=k.code||'';
- $('keyLocation').value=k.location||'';
- $('keyDetails').value=k.details||'';
- $('saveKey').textContent='Guardar cambios';
- $('cancelEdit').style.display='inline-block';
- $('keyName').focus({preventScroll:true});
- $('keyName').scrollIntoView({behavior:'smooth',block:'center'});
+ const k=key(id);if(!k){alert('No se ha encontrado la llave seleccionada.');return;}
+ tab('inventory');$('editId').value=k.id;$('keyName').value=k.name||'';$('keyCode').value=k.code||'';$('keyLocation').value=k.location||'';$('keyDetails').value=k.details||'';
+ $('saveKey').textContent='Guardar cambios';$('cancelEdit').style.display='inline-block';
+ $('keyName').focus({preventScroll:true});$('keyName').scrollIntoView({behavior:'smooth',block:'center'});
 }
-
 function goMove(id,t){
- $('type').value=t;moveOptions();$('moveKey').value=id;
- const m=active(id);
+ $('type').value=t;moveOptions();$('moveKey').value=id;const m=active(id);
  $('person').value=t==='in'?(m?.person||''):'';
  $('dni').value=t==='in'?(m?.returnDni||m?.dni||''):'';
- $('notes').value='';
- if(t==='out')$('outDateTime').value=localDateTime();else $('inDateTime').value=localDateTime();
+ $('notes').value='';if(t==='out')$('outDateTime').value=localDateTime();else $('inDateTime').value=localDateTime();
  clearSignature();tab('move',t);
 }
-
 document.addEventListener('click',e=>{
  const b=e.target.closest('button');if(!b)return;
  if(b.dataset.out)goMove(b.dataset.out,'out');
@@ -293,23 +257,14 @@ document.addEventListener('click',e=>{
  else if(b.dataset.del){
   const k=key(b.dataset.del);if(!k)return;
   if(status(k)==='out'){alert('Registra la devolución antes de eliminar esta llave.');return;}
-  if(confirm('¿Eliminar “'+k.name+'” del inventario?')){
-   data.keys=data.keys.filter(x=>x.id!==k.id);
-   if($('editId').value===k.id)clearForm();
-   save();
-  }
+  if(confirm('¿Eliminar “'+k.name+'” del inventario?')){data.keys=data.keys.filter(x=>x.id!==k.id);if($('editId').value===k.id)clearForm();save();}
  }
 });
-
-const canvas=$('sig'),ctx=canvas.getContext('2d');
-let drawing=false,ink=false;
+const canvas=$('sig'),ctx=canvas.getContext('2d');let drawing=false,ink=false;
 function setup(){
- const r=canvas.getBoundingClientRect(),d=Math.max(1,window.devicePixelRatio||1);
- if(!r.width||!r.height)return;
- const w=Math.round(r.width*d),h=Math.round(r.height*d);
- if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
- ctx.setTransform(d,0,0,d,0,0);ctx.lineWidth=3;ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#18312a';ctx.fillStyle='#64756e';ctx.font='13px system-ui';
- if(!ink)ctx.fillText('Firma aquí',12,24);
+ const r=canvas.getBoundingClientRect(),d=Math.max(1,window.devicePixelRatio||1);if(!r.width||!r.height)return;
+ const w=Math.round(r.width*d),h=Math.round(r.height*d);if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
+ ctx.setTransform(d,0,0,d,0,0);ctx.lineWidth=3;ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#18312a';ctx.fillStyle='#64756e';ctx.font='13px system-ui';if(!ink)ctx.fillText('Firma aquí',12,24);
 }
 function clearSignature(){
  const r=canvas.getBoundingClientRect(),d=Math.max(1,window.devicePixelRatio||1);
@@ -318,50 +273,32 @@ function clearSignature(){
  drawing=false;ink=false;$('sigStatus').textContent='Firma pendiente';
 }
 function pt(e){const r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
-canvas.addEventListener('pointerdown',e=>{
- e.preventDefault();setup();drawing=true;
- try{canvas.setPointerCapture(e.pointerId);}catch(_){}
- const p=pt(e);ctx.beginPath();ctx.moveTo(p.x,p.y);
-});
-canvas.addEventListener('pointermove',e=>{
- if(!drawing)return;e.preventDefault();const p=pt(e);ctx.lineTo(p.x,p.y);ctx.stroke();ink=true;$('sigStatus').textContent='Firma capturada';
-});
+canvas.addEventListener('pointerdown',e=>{e.preventDefault();setup();drawing=true;try{canvas.setPointerCapture(e.pointerId);}catch(_){}const p=pt(e);ctx.beginPath();ctx.moveTo(p.x,p.y);});
+canvas.addEventListener('pointermove',e=>{if(!drawing)return;e.preventDefault();const p=pt(e);ctx.lineTo(p.x,p.y);ctx.stroke();ink=true;$('sigStatus').textContent='Firma capturada';});
 function stopDrawing(){if(drawing){drawing=false;if(ink)$('sigStatus').textContent='Firma capturada';}}
 canvas.addEventListener('pointerup',stopDrawing);canvas.addEventListener('pointercancel',stopDrawing);canvas.addEventListener('lostpointercapture',stopDrawing);canvas.addEventListener('contextmenu',e=>e.preventDefault());
 window.addEventListener('resize',()=>{if($('move').classList.contains('active')&&!ink)setup();});
 $('clearSig').addEventListener('click',clearSignature);
-
 $('saveMove').addEventListener('click',()=>{
  const t=$('type').value,id=$('moveKey').value,k=key(id),person=$('person').value.trim(),dni=$('dni').value.trim();
- if(!k){alert('No hay ninguna llave para este movimiento.');return;}
- if(!person){alert('Escribe el nombre de la persona.');return;}
- if(!dni){alert('Escribe el DNI de la persona.');return;}
+ if(!k){alert('No hay ninguna llave para este movimiento.');return;}if(!person){alert('Escribe el nombre de la persona.');return;}if(!dni){alert('Escribe el DNI de la persona.');return;}
  if((t==='out'&&status(k)==='out')||(t==='in'&&status(k)!=='out')){alert('El estado de esta llave ha cambiado. Actualiza y vuelve a intentarlo.');render();return;}
  if(t==='out'&&!ink){alert('Falta la firma. Dibuja la firma con el dedo dentro del recuadro blanco antes de confirmar.');canvas.scrollIntoView({behavior:'smooth',block:'center'});return;}
  const chosen=t==='out'?$('outDateTime').value:$('inDateTime').value;
- if(!chosen){alert('Indica la fecha y hora del movimiento.');return;}
- const parsed=new Date(chosen);if(Number.isNaN(parsed.getTime())){alert('La fecha y hora no son válidas.');return;}
+ if(!chosen){alert('Indica la fecha y hora del movimiento.');return;}const parsed=new Date(chosen);if(Number.isNaN(parsed.getTime())){alert('La fecha y hora no son válidas.');return;}
  const sig=ink?canvas.toDataURL('image/png'):'',notes=$('notes').value.trim();
- if(t==='out'){
-  data.moves.push({id:makeId(),keyId:id,keyName:k.name,keyCode:k.code||'',type:'out',person,dni,notes,at:chosen,signature:sig,returnedAt:null});
- }else{
-  const original=active(id);
-  if(original){original.returnedAt=chosen;original.returnedBy=person;original.returnDni=dni;original.returnSignature=sig;original.returnNotes=notes;}
- }
- save();$('person').value='';$('dni').value='';$('notes').value='';clearSignature();
- alert(t==='out'?'Entrega registrada.':'Devolución registrada.');tab('keys');
+ if(t==='out')data.moves.push({id:makeId(),keyId:id,keyName:k.name,keyCode:k.code||'',type:'out',person,dni,notes,at:chosen,signature:sig,returnedAt:null});
+ else{const original=active(id);if(original){original.returnedAt=chosen;original.returnedBy=person;original.returnDni=dni;original.returnSignature=sig;original.returnNotes=notes;}}
+ save();$('person').value='';$('dni').value='';$('notes').value='';clearSignature();alert(t==='out'?'Entrega registrada.':'Devolución registrada.');tab('keys');
 });
-
 function renderHistory(){
  const q=$('searchHistory').value.trim().toLowerCase();
  const arr=[...data.moves].reverse().filter(m=>(m.keyName+' '+m.keyCode+' '+m.person+' '+m.dni+' '+m.returnedBy+' '+m.returnDni+' '+m.notes+' '+m.returnNotes).toLowerCase().includes(q));
  $('historyList').innerHTML=arr.length?arr.map(m=>`<div class="log"><b>${m.type==='out'?'Entrega':'Devolución'}: ${esc(m.keyName)}</b><div class="logmeta">${stamp(m.at)} · ${esc(m.person)} · DNI ${esc(m.dni||'—')}${m.notes?' · '+esc(m.notes):''}</div>${m.signature?`<details><summary>Ver firma</summary><img alt="Firma" src="${m.signature}" style="width:100%;max-width:250px"></details>`:''}${m.type==='out'&&m.returnedAt?`<div class="logmeta">Devuelta ${stamp(m.returnedAt)}${m.returnedBy?' por '+esc(m.returnedBy):''}${m.returnDni?' · DNI '+esc(m.returnDni):''}${m.returnNotes?' · '+esc(m.returnNotes):''}</div>${m.returnSignature?`<details><summary>Ver firma de devolución</summary><img alt="Firma de devolución" src="${m.returnSignature}" style="width:100%;max-width:250px"></details>`:''}`:''}</div>`).join(''):'<div class="empty">No hay movimientos registrados.</div>';
 }
 $('searchHistory').addEventListener('input',renderHistory);
-
 function download(name,content,type){
- const u=URL.createObjectURL(new Blob([content],{type})),a=document.createElement('a');
- a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);
+ const u=URL.createObjectURL(new Blob([content],{type})),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);
 }
 $('backup').addEventListener('click',()=>download('copia-custodia-llaves.json',JSON.stringify(data,null,2),'application/json'));
 $('csv').addEventListener('click',()=>{
@@ -375,10 +312,13 @@ $('backupFile').addEventListener('change',async e=>{
   const x=JSON.parse(await f.text());
   if(!x||!Array.isArray(x.keys)||!Array.isArray(x.moves)||!x.keys.every(k=>k&&typeof k==='object'&&typeof k.id==='string'&&typeof k.name==='string')||!x.moves.every(m=>m&&typeof m==='object'&&typeof m.keyId==='string'&&['out','in'].includes(m.type)))throw 0;
   if(confirm('La copia sustituirá los datos actuales. ¿Continuar?')){data=x;await persist();render();alert('Copia restaurada.');}
- }catch(err){alert('El archivo no es una copia válida.');}
- e.target.value='';
+ }catch(err){alert('El archivo no es una copia válida.');}e.target.value='';
 });
-
+function render(){
+ renderKeys();renderInventory();renderHistory();moveOptions();
+ const total=data.keys.length,used=data.keys.filter(k=>status(k)==='out').length;
+ $('total').textContent=total;$('avail').textContent=total-used;$('used').textContent=used;
+}
 $('outDateTime').value=localDateTime();$('inDateTime').value=localDateTime();
 setup();render();
 })();
