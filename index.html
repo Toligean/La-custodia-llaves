@@ -205,7 +205,7 @@ function renderInventory(){
  const q=(input?.value||'').trim().toLocaleLowerCase('es');
  const list=data.keys.filter(k=>[k.name,k.code,k.location,k.details].some(v=>String(v||'').toLocaleLowerCase('es').includes(q)));
  $('inventoryList').innerHTML=list.length?list.map(k=>`
-  <div class="card">
+  <div class="card" data-inventory-key="${esc(k.id)}">
    <div class="top"><div><div class="name">${esc(k.name)}</div><div class="sub">${esc(k.code||'Sin código')}${k.location?' · '+esc(k.location):''}</div></div>
    <span class="pill ${status(k)==='out'?'inuse':'available'}">${status(k)==='out'?'EN USO':'DISPONIBLE'}</span></div>
    ${k.details?`<div class="sub">${esc(k.details)}</div>`:''}
@@ -214,6 +214,13 @@ function renderInventory(){
     <button class="btn light small" type="button" data-del="${esc(k.id)}">Eliminar</button>
    </div>
   </div>`).join(''):'<div class="empty">No se encontraron llaves en el inventario.</div>';
+ // Al buscar, desplaza la vista hasta la primera llave coincidente.
+ if(q && list.length){
+  requestAnimationFrame(()=>{
+   const first=$('inventoryList').querySelector('[data-inventory-key]');
+   first?.scrollIntoView({behavior:'smooth',block:'center'});
+  });
+ }
 }
 
 function moveOptions(){
